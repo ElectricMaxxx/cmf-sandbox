@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="CMFapp">
+<head>
+    <meta charset="UTF-8">
+    <title>Symfon CMF application</title>
+</head>
+<body>
+<div ng-controller="DocumentController as ctrl">
+    <h1>{{ctrl.resource.title}}</h1>
+
+    <p>{{ctrl.resource.body}}</p>
+</div>
+
+<script type="application/javascript" src="lib/resource/bower_components/angular/angular.min.js"></script>
+<script type="application/javascript" src="lib/resource/bower_components/angular-mocks/angular-mocks.js"></script>
+<script type="application/javascript" src="lib/resource/bower_components/restangular/dist/restangular.min.js"></script>
+<script type="application/javascript" src="lib/resource/bower_components/lodash/dist/lodash.min.js"></script>
+
+<script type="application/javascript" src="lib/resource/dist/angularCmf.resource.js"></script>
+<script type="application/javascript">
+    angular
+            .module('CMFapp', ['angularCmf'])
+            .controller('DocumentController', ['UnitOfWork', function (UnitOfWork) {
+                var vm = this;
+                vm.resource = {};
+
+                UnitOfWork.find('/foo').then(function (resource) {
+                    vm.resource = resource;
+                });
+
+                vm.save = function (id) {
+                    // does no second API call, when fetched before
+                    UnitOfWork.find('/foo').then(function (data) {
+                        UnitOfWork.persist(data).then(function () {
+                            // the API call is done now
+                            UnitOfWork.flush();
+                        })
+                    });
+                }
+
+                vm.delete = function (id) {
+                    // does no second API call, when fetched before
+                    UnitOfWork.find('/foo').then(function (data) {
+                        UnitOfWork.remove(data).then(function () {
+                            // the API call is done now
+                            UnitOfWork.flush();
+                        })
+                    });
+                }
+            }]);
+</script>
+</body>
+</html>
